@@ -17,30 +17,24 @@ int main(int argc, char* argv[]) {
   ///////////////////////////////////////////////////////////////////////////
   // arrays, vectors and other templated containers are all supported
 
-  std::array<int, 10> a = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-  std::array<int, 10> b = {9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
+  const std::array<int, 10> a = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+  const std::array<int, 10> b = {9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
 
 
   ///////////////////////////////////////////////////////////////////////////
   // Multiple sources, single condition
 
-  std::cout << (from(a, b) , [](int x, int y) { return x < y; })()
+  std::cout << "x < y: " << std::endl
+            << (from(a, b) , [](int x, int y) { return x < y; })()
             << std::endl << std::endl;
 
 
   ///////////////////////////////////////////////////////////////////////////
   // Multiple sources, multiple conditions
 
-  std::cout << (from(a, a, a) , [](int x, int y, int z) { return x + y < z; }
+  std::cout << "(x + y < z) && (x > y): " << std::endl
+            << (from(a, a, a) , [](int x, int y, int z) { return x + y < z; }
                               , [](int x, int y, int z) { return x > y; })()
-            << std::endl<< std::endl;
-
-
-  ///////////////////////////////////////////////////////////////////////////
-  // Multiple sources, multiple conditions and a selecting transform
-
-  std::cout << ((from(a, a, a) , [](int x, int y, int z) { return x + y + z == 10; })
-                             >>= [](int x, int y, int z) { return std::make_tuple(x+y+z, x+y+z, x+y+z); })()
             << std::endl<< std::endl;
 
 
@@ -49,11 +43,21 @@ int main(int argc, char* argv[]) {
 
   auto list = (from(a, b), [](int x, int y) { return x == y; });
 
+  std::cout << "(x == y) using iterators: " << std::endl;
   for(auto it = std::begin(list); it != std::end(list); ++it) {
     std::cout << *it;
   }
 
   std::cout << std::endl << std::endl;
+
+
+///////////////////////////////////////////////////////////////////////////
+  // Multiple sources, multiple conditions and a selecting transform
+
+  auto mult_triple = [](int x, int y, int z) { return x * y * z; };
+  std::cout << "(x*y*z) where (x+y+z==10):" << std::endl
+            << (mult_triple | (from(a, a, a), [](int x, int y, int z) { return x + y + z == 10; }))()
+            << std::endl << std::endl;
 
 
   ///////////////////////////////////////////////////////////////////////////
@@ -73,7 +77,8 @@ int main(int argc, char* argv[]) {
     return r;
   };
   auto r = range(1, 20);
-  std::cout << (from(r, r, r), [](int x, int y, int z) { return x < y && y < z; },
+  std::cout << "PythagoreanTriples: "
+            << (from(r, r, r), [](int x, int y, int z) { return x < y && y < z; },
                                [](int x, int y, int z) { return x*x + y*y == z*z; })() << std::endl;
 
 }
