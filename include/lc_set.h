@@ -245,7 +245,7 @@ private:
 ///////////////////////////////////////////////////////////////////////////
 
 template<typename... Args> 
-cartesian<std::tuple<Args...>, Args...> from(const typename types<Args>::list&... args) {
+cartesian<std::tuple<Args...>, Args...> from(const std::vector<Args>&... args) {
   return cartesian<std::tuple<Args...>, Args...>(args...);
 }
 

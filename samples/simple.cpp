@@ -4,6 +4,7 @@
 // www.opensource.org/licenses/mit-license.php
 /////////////////////////////////////////////////////////////////////////////
 
+#include <algorithm>
 #include <array>
 #include <iostream>
 
@@ -62,5 +63,17 @@ int main(int argc, char* argv[]) {
   auto cond = [](int x, int y) { return x == y; };
   std::cout << "Untransformed: " << (from(a, b), cond)() << std::endl;
   std::cout << "Transformed:   " << (tf | (from(a, b), cond))() << std::endl;
+
+  ///////////////////////////////////////////////////////////////////////////
+  // Pythagorean triples
+
+  auto range = [](int i0, int n) -> std::vector<int> {
+    std::vector<int> r;
+    std::generate_n(std::back_inserter(r), n, [=]() mutable { return i0++; });
+    return r;
+  };
+  auto r = range(1, 20);
+  std::cout << (from(r, r, r), [](int x, int y, int z) { return x < y && y < z; },
+                               [](int x, int y, int z) { return x*x + y*y == z*z; })() << std::endl;
 
 }
