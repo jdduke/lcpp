@@ -13,6 +13,11 @@ Generate all pairs of numbers between 0 and 9 where the sum of each pair is 10:
     std::array<int,10> a = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     auto pairs = (from(a, a), [](int x, int y) { return x + y == 10; })();    
     
+Generate sums for each tuple where x < y and y < 10:
+
+    std::array<int, 10> a = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+    auto sums =  (select(std::plus<int>()) | (from(a, a), std::less<int>()))(); 
+    
 Documentation
 -------------
 
