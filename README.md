@@ -18,6 +18,17 @@ Generate pair-wise sums for all pairs satisfying x < y and y between 0 and 9:
     std::array<int, 10> a = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
     auto sums =  (std::plus<int>() | (from(a, a), std::less<int>()))(); 
     
+Pythagorean triples with elements between 1 and 20:
+    
+    auto range = [](int i0, int n) -> std::vector<int> {
+      std::vector<int> r;
+      std::generate_n(std::back_inserter(r), n, [=]() mutable { return i0++; });
+      return r;
+    };
+    auto r = range(1, 20);
+    auto triples = (from(r, r, r), [](int x, int y, int z) { return x < y && y < z; },
+                                   [](int x, int y, int z) { return x*x + y*y == z*z; })();
+
 Documentation
 -------------
 
