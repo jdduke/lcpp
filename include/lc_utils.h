@@ -1,3 +1,9 @@
+/////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2012, Jared Duke.
+// This code is released under the MIT License.
+// www.opensource.org/licenses/mit-license.php
+/////////////////////////////////////////////////////////////////////////////
+
 #ifndef _LC_UTILS_H_
 #define _LC_UTILS_H_
 
@@ -11,6 +17,8 @@ namespace lc {
 
 ///////////////////////////////////////////////////////////////////////////
 // seq/gens provide a variadic parameter pack of indices, useful for operations on tuples
+//    Credit to Johannes Schaub for the solution @ stackoverflow
+//http://stackoverflow.com/questions/7858817/unpacking-a-tuple-to-call-a-matching-function-pointer/7858971#7858971
 
 template<int ...>
 struct seq { };
@@ -79,7 +87,7 @@ inline auto apply(seq<S...>, const TupleType&& t, F& f) -> decltype( f(std::get<
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// make a tuple out of the result of applying f on each element of the provided tuple
+// make a tuple out of the result of applying f to each element of the provided tuple
 
 template<int ...S, typename TupleType, typename F> 
 inline auto tuple_apply(seq<S...>, TupleType&& t, F f) -> decltype( std::make_tuple( f( std::get<S>(t) )... ) ) {
@@ -151,45 +159,6 @@ auto vec(const C& c) -> typename types<typename std::remove_const<typename std::
   typedef typename std::remove_const<typename std::remove_reference<decltype(*std::begin(c))>::type>::type T;
   return typename types<T>::list(std::begin(c), std::end(c));
 }
-
-///////////////////////////////////////////////////////////////////////////
-// Function traits
-
-template<typename R, typename... Args>
-struct func_wrapper {
-  typedef std::function<R(Args...)> func_type;
-
-  template<typename F>
-  func_wrapper(F f) : mF(f) { }
-
-  func_wrapper(func_type f) : mF(f) { }
-
-  func_type mF;
-};
-
-template <typename T>
-struct function_pointer_traits {
-  typedef std::function<typename std::enable_if<std::is_function<T>::value, T>::type> type;
-};
-
-template <typename T>
-struct function_traits : public function_traits< decltype( &T::operator() )> {};
-
-template <typename T>
-struct function_traits<T*> : public function_traits< typename function_pointer_traits<T>::type > { };
-
-template <typename C, typename R, typename... Args>
-struct function_traits<R(C::*)(Args...) const> {
-  typedef std::function<R(Args...)>  func_type;
-  typedef func_wrapper<R,Args...>    wrapped_func_type;
-
-};
-
-template <typename C, typename R, typename... Args>
-struct function_traits<R(C::*)(Args...)> {
-  typedef std::function<R(Args...)>  func_type;
-  typedef func_wrapper<R,Args...>    wrapped_func_type;
-};
 
 ///////////////////////////////////////////////////////////////////////////
 

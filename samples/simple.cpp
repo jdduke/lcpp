@@ -1,3 +1,9 @@
+/////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2012, Jared Duke.
+// This code is released under the MIT License.
+// www.opensource.org/licenses/mit-license.php
+/////////////////////////////////////////////////////////////////////////////
+
 #include <array>
 #include <iostream>
 
@@ -9,12 +15,14 @@ int main(int argc, char* argv[]) {
 
   ///////////////////////////////////////////////////////////////////////////
   // arrays, vectors and other templated containers are all supported
+
   std::array<int, 10> a = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
   std::array<int, 10> b = {9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
 
 
   ///////////////////////////////////////////////////////////////////////////
   // Multiple sources, single condition
+
   std::cout << (from(a, b) , [](int x, int y) { return x < y; })()
             << std::endl << std::endl;
 
@@ -40,7 +48,7 @@ int main(int argc, char* argv[]) {
 
   auto list = (from(a, b), [](int x, int y) { return x == y; });
 
-  for(auto it = list.begin(); it != list.end(); ++it) {
+  for(auto it = std::begin(list); it != std::end(list); ++it) {
     std::cout << *it;
   }
 
@@ -53,6 +61,6 @@ int main(int argc, char* argv[]) {
   auto tf   = [](int x, int y) { return x + y;  };
   auto cond = [](int x, int y) { return x == y; };
   std::cout << "Untransformed: " << (from(a, b), cond)() << std::endl;
-  std::cout << "Transformed:   " << (select(tf) | (from(a, b), cond))() << std::endl;
+  std::cout << "Transformed:   " << (tf | (from(a, b), cond))() << std::endl;
 
 }
