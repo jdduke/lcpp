@@ -14,6 +14,7 @@
 namespace lc {
 
 ///////////////////////////////////////////////////////////////////////////
+// Provide ostream-based output of vectors, and variadic tuples
 
 template<std::size_t> struct size_ { };
 

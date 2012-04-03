@@ -9,6 +9,9 @@
 
 namespace lc {
 
+//////////////////////////////////////////////////////////////////////////
+// Forward declaration
+
 template<typename R, typename... Args> class cartesian;
 
 } // namespace lc

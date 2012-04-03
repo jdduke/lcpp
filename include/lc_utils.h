@@ -29,9 +29,12 @@ struct gens : gens<N-1, N-1, S...> { };
 template<int ...S>
 struct gens<0, S...> {
   typedef seq<S...> type;
-}; 
+};
 
 ///////////////////////////////////////////////////////////////////////////
+// deref, begin and end wrap their respective functions
+//    These wrappers provide convenient syntax when used with higher-order functions
+//    e.g., we can provide begin() as a parameter to std::transform, rather than begin<std::vector<int>>
 
 struct deref {
   template<typename It>
@@ -74,7 +77,7 @@ struct end {
 };
 
 ///////////////////////////////////////////////////////////////////////////
-// apply an operation to each element in a variadic tuple
+// Apply an operation to each element in a variadic tuple
 
 template<int... S, typename TupleType, typename F>
 inline auto apply(seq<S...>, TupleType&& t, F f) -> decltype( f(std::get<S>(t)...) ) {
@@ -87,28 +90,28 @@ inline auto apply(seq<S...>, const TupleType&& t, F& f) -> decltype( f(std::get<
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// make a tuple out of the result of applying f to each element of the provided tuple
+// Create a tuple from the results of applying f to each element of the provided tuple
 
-template<int ...S, typename TupleType, typename F> 
+template<int ...S, typename TupleType, typename F>
 inline auto tuple_apply(seq<S...>, TupleType&& t, F f) -> decltype( std::make_tuple( f( std::get<S>(t) )... ) ) {
   return std::make_tuple( f( std::get<S>(t) )... );
 }
 
-template<int ...S, typename TupleType, typename F> 
+template<int ...S, typename TupleType, typename F>
 inline auto tuple_apply(seq<S...>, const TupleType& t, F& f) -> decltype( std::make_tuple( f( std::get<S>(t) )... ) ) {
   return std::make_tuple( f( std::get<S>(t) )... );
 }
 
 ///////////////////////////////////////////////////////////////////////////
 // Given a tuple of iterators, provide a means for advancing over the cartesian product sequence
-//    i.e., the last tuple iterator is the "inner-most" iterator, the first is the outer-most
+//    i.e., the last iterator in the tuple is the "inner-most" iterator, the first is the outer-most
 
 template<size_t N> struct tuple_iterate;
 
 template<> struct tuple_iterate<0> {
   template< typename... IterTypes >
-  static bool next(const std::tuple<IterTypes...>& it, 
-                   const std::tuple<IterTypes...>& beginIt, 
+  static bool next(const std::tuple<IterTypes...>& it,
+                   const std::tuple<IterTypes...>& beginIt,
                    const std::tuple<IterTypes...>& endIt) {
     return false;
   }
@@ -116,8 +119,8 @@ template<> struct tuple_iterate<0> {
 
 template<size_t N> struct tuple_iterate {
   template< typename... IterTypes >
-  static bool next(std::tuple<IterTypes...>& it, 
-                   const std::tuple<IterTypes...>& beginIt, 
+  static bool next(std::tuple<IterTypes...>& it,
+                   const std::tuple<IterTypes...>& beginIt,
                    const std::tuple<IterTypes...>& endIt) {
     static const size_t i = sizeof...(IterTypes) - N;
 
@@ -133,8 +136,8 @@ template<size_t N> struct tuple_iterate {
 };
 
 template<typename... IterTypes>
-bool iterate(std::tuple<IterTypes...>& it, 
-             const std::tuple<IterTypes...>& beginIt, 
+bool iterate(std::tuple<IterTypes...>& it,
+             const std::tuple<IterTypes...>& beginIt,
              const std::tuple<IterTypes...>& endIt) {
   // Next returns false if it has finished a complete cycle
   //      In that case, we manually reset the iterator to the end
@@ -154,10 +157,29 @@ struct types {
   typedef std::vector<T> list;
 };
 
+/////////////////////////////////////////////////////////////////////////
+// Construct a vector from a container that provides valid calls to std::begin/end
+
 template< typename C >
-auto vec(const C& c) -> typename types<typename std::remove_const<typename std::remove_reference<decltype(*std::begin(c))>::type>::type>::list {
+auto toList(const C& c) -> typename types<typename std::remove_const<typename std::remove_reference<decltype(*std::begin(c))>::type>::type>::list {
   typedef typename std::remove_const<typename std::remove_reference<decltype(*std::begin(c))>::type>::type T;
   return typename types<T>::list(std::begin(c), std::end(c));
+}
+
+template< typename C >
+auto toList(C&& c) -> typename types<typename std::remove_const<typename std::remove_reference<decltype(*std::begin(c))>::type>::type>::list {
+  typedef typename std::remove_const<typename std::remove_reference<decltype(*std::begin(c))>::type>::type T;
+  return typename types<T>::list(std::begin(c), std::end(c));
+}
+
+template< typename T >
+const typename types<T>::list& toList(const typename types<T>::list& v) {
+  return v;
+}
+
+template< typename T >
+typename types<T>::list toList(typename types<T>::list&& v) {
+  return std::move(v);
 }
 
 ///////////////////////////////////////////////////////////////////////////
