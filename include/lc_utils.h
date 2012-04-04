@@ -50,7 +50,7 @@ struct deref {
 
 ///////////////////////////////////////////////////////////////////////////
 
-struct begin {
+struct container_begin {
   template<typename C>
   inline auto operator()(C& c) -> decltype( std::begin(c) ) {
     return std::begin(c);
@@ -64,7 +64,7 @@ struct begin {
 
 ///////////////////////////////////////////////////////////////////////////
 
-struct end {
+struct container_end {
   template<typename C>
   inline auto operator()(C& c) -> decltype( std::end(c) ) {
     return std::end(c);

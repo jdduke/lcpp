@@ -171,22 +171,22 @@ private:
 
   // Create a tuple of iterators to the beginnings of each list in a tuple of lists
   tuple_iter tupleBegin() {
-    return tuple_apply(tuple_indices(), mLists, ::lc::begin());
+    return tuple_apply(tuple_indices(), mLists, container_begin());
   }
 
   // Create a tuple of const iterators to the beginnings of each list in a tuple of lists
   const_tuple_iter tupleBegin() const {
-    return tuple_apply(tuple_indices(), mLists, ::lc::begin());
+    return tuple_apply(tuple_indices(), mLists, container_begin());
   }
 
   // Create a tuple of iterators to the ends of each list in a tuple of lists
   tuple_iter tupleEnd() {
-    return tuple_apply(tuple_indices(), mLists, ::lc::end());
+    return tuple_apply(tuple_indices(), mLists, container_end());
   }
 
   // Create a tuple of const iterators to the ends of each list in a tuple of lists
   const_tuple_iter tupleEnd() const {
-    return tuple_apply(tuple_indices(), mLists, ::lc::end());
+    return tuple_apply(tuple_indices(), mLists, container_end());
   }
 
   // Return whether the value referenced by the iterator satisifes all filter conditions

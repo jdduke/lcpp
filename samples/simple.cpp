@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
   auto list = (from(a, b), [](int x, int y) { return x == y; });
 
   cout << "(x == y) using iterators: " << endl;
-  for(auto it = list.begin(); it != list.end(); ++it) {
+  for(auto it = begin(list); it != end(list); ++it) {
     cout << *it;
   }
 
@@ -73,7 +73,7 @@ int main(int argc, char* argv[]) {
   // Pythagorean triples
 
   vector<int> r(20);
-  iota(std::begin(r), std::end(r), 1);
+  iota(begin(r), end(r), 1);
   cout << "PythagoreanTriples: "
             << (from(r, r, r), [](int x, int y, int z) { return x < y && y < z; },
                                [](int x, int y, int z) { return x*x + y*y == z*z; })() << endl;
