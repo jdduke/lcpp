@@ -51,7 +51,7 @@ struct cartesian {
   // Construct from lists of types Args..., and a list of filters
   cartesian(typename types<Args>::list... args, std::initializer_list<filter_type> l)
     : mLists(std::make_tuple(std::move(args)...)),
-      mFilters(l),
+      mFilters(std::move(l)),
       mTransform(std::make_tuple<Args...>) { }
 
   // Copy constructor
