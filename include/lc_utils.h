@@ -20,19 +20,19 @@ namespace lc {
 //    Credit to Johannes Schaub for the solution @ stackoverflow
 //http://stackoverflow.com/questions/7858817/unpacking-a-tuple-to-call-a-matching-function-pointer/7858971#7858971
 
-template<int ...>
+template<int...>
 struct seq { };
 
-template<int N, int ...S>
+template<int N, int... S>
 struct gens : gens<N-1, N-1, S...> { };
 
-template<int ...S>
+template<int... S>
 struct gens<0, S...> {
   typedef seq<S...> type;
 };
 
 ///////////////////////////////////////////////////////////////////////////
-// deref, begin and end wrap their respective functions
+// deref, container_begin and container_end wrap their respective functions
 //    These wrappers provide convenient syntax when used with higher-order functions
 //    e.g., we can provide begin() as a parameter to std::transform, rather than begin<std::vector<int>>
 
