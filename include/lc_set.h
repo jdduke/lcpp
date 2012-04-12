@@ -153,11 +153,6 @@ private:
     std::swap(mTransform, other.mTransform);
   }
 
-  // Create a tuple of values from a tuple of iterators
-  static tuple_value valueOf(tuple_iter it) {
-    return tuple_apply(tuple_indices(), it,     deref());
-  }
-
   // Create a tuple of values from a tuple of const iterators
   static tuple_value valueOf(const_tuple_iter it) {
     return tuple_apply(tuple_indices(), it,     deref());
@@ -173,16 +168,6 @@ private:
     return tuple_apply(tuple_indices(), mLists, container_end());
   }
 
-  // Return whether the value referenced by the iterator satisifes all filter conditions
-  bool filter(tuple_iter& it) const {
-    const auto v = valueOf(it);
-    for (auto f = std::begin(mFilters); f != std::end(mFilters); ++f) {
-      if (!apply(tuple_indices(), v, *f))
-        return false;
-    }
-    return true;
-  }
-
   // Return whether the value referenced by the const iterator satisifes all filter conditions
   bool filter(const_tuple_iter& it) const {
     const auto v = valueOf(it);
@@ -191,11 +176,6 @@ private:
         return false;
     }
     return true;
-  }
-
-  // Transform the value referenced by the iterator according to the member transform
-  R transform(tuple_iter it) const {
-    return apply(tuple_indices(), valueOf(it), mTransform);
   }
 
   // Transform the value referenced by the const iterator according to the member transform
