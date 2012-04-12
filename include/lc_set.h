@@ -54,24 +54,10 @@ struct product_set {
       mFilters(std::move(l)),
       mTransform(std::make_tuple<Args...>) { }
 
-  // Copy constructor
-  //  TODO: Disable this
-  product_set(const product_set& other)
-    : mLists(other.mLists),
-      mFilters(other.mFilters),
-      mTransform(other.mTransform) { }
-
   // Copy move constructor
   product_set(product_set&& other) {
     swap(std::move(other));
   }
-
-  // Copy constructor from set with different transform type
-  //  TODO: Disable this
-  template<typename R2>
-  product_set(const product_set<R2,Args...>& other)
-    : mLists(other.mLists),
-      mFilters(other.mFilters) { }
 
   // Copy move constructor from set with different transform type
   template<typename R2>
@@ -88,7 +74,6 @@ struct product_set {
 
   ///////////////////////////////////////////////////////////////////////////
   // Methods
-
 
   // Adds a filter to the set, no processing is performed
   //    The filter must have a signature of type:   bool(Args...)
@@ -145,6 +130,7 @@ struct product_set {
 private:
 
   product_set();
+  product_set(const product_set&);
   product_set& operator=(const product_set&);
 
   void swap(product_set&& other) {

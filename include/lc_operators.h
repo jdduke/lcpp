@@ -21,7 +21,7 @@ namespace lc {
 
 template<typename F, typename R, typename... Args>
 auto operator|(F f, product_set<R,Args...>&& c) -> product_set< decltype(f(std::declval<Args>()...)), Args...> {
-  return product_set<decltype(f(std::declval<Args>()...)),Args...>(std::move(c)).select(f);
+  return std::move(product_set<decltype(f(std::declval<Args>()...)),Args...>(std::move(c)).select(f));
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -31,13 +31,8 @@ auto operator|(F f, product_set<R,Args...>&& c) -> product_set< decltype(f(std::
 //        auto set = (from( a, b ), [](int x, int y) { return x == y; });
 
 template<typename R, typename... Args, typename F>
-product_set<R,Args...>& operator,(product_set<R,Args...>& c, F f) {
-  return c.where(f);
-}
-
-template<typename R, typename... Args, typename F>
 product_set<R,Args...> operator,(product_set<R,Args...>&& c, F f) {
-  return c.where(f);
+  return std::move(c.where(f));
 }
 
 ///////////////////////////////////////////////////////////////////////////
