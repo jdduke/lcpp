@@ -106,7 +106,8 @@ inline auto tuple_apply(seq<S...>, const TupleType& t, F& f) -> decltype( std::m
 // Given a tuple of iterators, provide a means for advancing over the product set sequence
 //    i.e., the last iterator in the tuple is the "inner-most" iterator, the first is the outer-most
 
-template<size_t N> struct tuple_iterate;
+template<size_t N>
+struct tuple_iterate;
 
 template<> struct tuple_iterate<0> {
   template< typename... IterTypes >
@@ -117,7 +118,8 @@ template<> struct tuple_iterate<0> {
   }
 };
 
-template<size_t N> struct tuple_iterate {
+template<size_t N>
+struct tuple_iterate {
   template< typename... IterTypes >
   static bool next(std::tuple<IterTypes...>& it,
                    const std::tuple<IterTypes...>& beginIt,
@@ -139,6 +141,9 @@ template<typename... IterTypes>
 bool iterate(std::tuple<IterTypes...>& it,
              const std::tuple<IterTypes...>& beginIt,
              const std::tuple<IterTypes...>& endIt) {
+  if (it == endIt)
+    return false;
+
   // Next returns false if it has finished a complete cycle
   //      In that case, we manually reset the iterator to the end
   if(tuple_iterate<sizeof...(IterTypes)>::next(it, beginIt, endIt)) {
