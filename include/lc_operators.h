@@ -20,8 +20,8 @@ namespace lc {
 //       auto set = (std::plus<int> | from( a, b ));
 
 template<typename F, typename R, typename... Args>
-auto operator|(F f, cartesian<R,Args...>&& c) -> cartesian< decltype(f(std::declval<Args>()...)), Args...> {
-  return cartesian<decltype(f(std::declval<Args>()...)),Args...>(std::move(c)).select(f);
+auto operator|(F f, product_set<R,Args...>&& c) -> product_set< decltype(f(std::declval<Args>()...)), Args...> {
+  return product_set<decltype(f(std::declval<Args>()...)),Args...>(std::move(c)).select(f);
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -31,12 +31,12 @@ auto operator|(F f, cartesian<R,Args...>&& c) -> cartesian< decltype(f(std::decl
 //        auto set = (from( a, b ), [](int x, int y) { return x == y; });
 
 template<typename R, typename... Args, typename F>
-cartesian<R,Args...>& operator,(cartesian<R,Args...>& c, F f) {
+product_set<R,Args...>& operator,(product_set<R,Args...>& c, F f) {
   return c.where(f);
 }
 
 template<typename R, typename... Args, typename F>
-cartesian<R,Args...> operator,(cartesian<R,Args...>&& c, F f) {
+product_set<R,Args...> operator,(product_set<R,Args...>&& c, F f) {
   return c.where(f);
 }
 

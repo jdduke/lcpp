@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <array>
 #include <iostream>
+#include <string>
 
 #include "lcpp.h"
 
@@ -18,39 +19,40 @@ int main(int argc, char* argv[]) {
   ///////////////////////////////////////////////////////////////////////////
   // arrays, vectors and other templated containers are all supported
 
-  const array<int, 10> a = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
-  const array<int, 10> b = {9, 8, 7, 6, 5, 4, 3, 2, 1, 0};
+  const array<int,    10> a = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+  const array<string, 5>  b = {"a", "b", "c", "d", "e"};
 
 
   ///////////////////////////////////////////////////////////////////////////
   // Multiple sources, single condition
 
-  cout << "x < y: " << endl
-            << (from(a, b) , [](int x, int y) { return x < y; })()
+  cout << "x < 5, y != 'c': " << endl
+            << (from(a, b) , [](int x, const std::string& y) { return x < 5 && y[0] != 'c'; })()
             << endl << endl;
 
 
   ///////////////////////////////////////////////////////////////////////////
   // Multiple sources, multiple conditions
 
-  cout << "(x + y < z) && (x > y): " << endl
-            << (from(a, a, a) , [](int x, int y, int z) { return x + y < z; }
-                              , [](int x, int y, int z) { return x > y; })()
+  cout << "(x > 5) && (y == z): " << endl
+            << (from(a, b, b) , [](int x, const std::string&,   const std::string&)   { return x > 5; }
+                              , [](int,   const std::string& y, const std::string& z) { return y == z; })()
             << endl<< endl;
 
+  // TODO
+#if 0
 
   ///////////////////////////////////////////////////////////////////////////
   // Iterators
 
-  auto list = (from(a, b), [](int x, int y) { return x == y; });
+  auto list = (from(a, b));//, [](int x, const std::string& y) { return true; x == (y[0] - 'a'); });
 
-  cout << "(x == y) using iterators: " << endl;
+  cout << "(x == (y-'a')) using iterators: " << endl;
   for(auto it = begin(list); it != end(list); ++it) {
     cout << *it;
   }
 
   cout << endl << endl;
-
 
 ///////////////////////////////////////////////////////////////////////////
   // Multiple sources, multiple conditions and a selecting transform
@@ -77,5 +79,7 @@ int main(int argc, char* argv[]) {
   cout << "PythagoreanTriples: "
             << (from(r, r, r), [](int x, int y, int z) { return x < y && y < z; },
                                [](int x, int y, int z) { return x*x + y*y == z*z; })() << endl;
+#endif
 
 }
+

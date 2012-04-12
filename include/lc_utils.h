@@ -103,7 +103,7 @@ inline auto tuple_apply(seq<S...>, const TupleType& t, F& f) -> decltype( std::m
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// Given a tuple of iterators, provide a means for advancing over the cartesian product sequence
+// Given a tuple of iterators, provide a means for advancing over the product set sequence
 //    i.e., the last iterator in the tuple is the "inner-most" iterator, the first is the outer-most
 
 template<size_t N> struct tuple_iterate;
