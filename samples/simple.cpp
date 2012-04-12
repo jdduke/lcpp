@@ -42,12 +42,11 @@ int main(int argc, char* argv[]) {
   ///////////////////////////////////////////////////////////////////////////
   // Iterators
 
-  auto list = (from(a, b), [](int x, int y) { return x == y; });
+  auto set = (from(a, b), [](int x, int y) { return x == y; });
 
   cout << "(x == y) using iterators: " << endl;
-  for(auto it = begin(list); it != end(list); ++it) {
-    cout << *it;
-  }
+  for (const auto& s : set)
+    cout << s;
 
   cout << endl << endl;
 
