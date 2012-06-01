@@ -11,6 +11,7 @@
 #include "lc_utils.h"
 
 #include <iterator>
+#include <initializer_list>
 
 namespace lc {
 
@@ -83,6 +84,7 @@ struct product_set {
   // Assignment operator
   product_set& operator=(product_set&& other) {
     swap(std::move(other));
+    return *this;
   }
 
 
@@ -233,9 +235,9 @@ public:
   iterator(const iterator& other)
     : mIt(other.mIt), mBegin(other.mBegin), mEnd(other.mEnd), mDirty(other.mDirty), mSource(other.mSource) { }
 
-  const R& operator*()  const { update();  return  mValue; }
-  const R* operator->() const { update();  return &mValue; }
-  iterator& operator++()      { advance(); return *this;   }
+  const R& operator*()  const { update();   return  mValue; }
+  const R* operator->() const { update();   return &mValue; }
+  iterator& operator++()      { advance(1); return *this;   }
 
   bool operator==(const iterator& other) { return mIt == other.mIt; }
   bool operator!=(const iterator& other) { return mIt != other.mIt; }
@@ -251,7 +253,7 @@ private:
     mDirty = false;
   }
 
-  void advance(size_t count = 1) {
+  void advance(size_t count) {
     mDirty = count > 0;
     while (count > 0 && iterate(mIt, mBegin, mEnd)) {
       if(mSource.filter(mIt))
@@ -261,7 +263,7 @@ private:
 
   void advanceBegin() {
     if(!mSource.filter(mIt))
-      advance();
+      advance(1);
   }
 
   It  mIt;
@@ -284,14 +286,14 @@ product_set<std::tuple<Args...>, Args...> from(std::vector<Args>... args) {
 }
 
 // Create a product set from the specified arrays, not necessarily of the same underlying type
-template< size_t... Sizes, typename... Args>
+template<size_t... Sizes, typename... Args>
 product_set<std::tuple<Args...>, Args...> from(const std::array<Args,Sizes>&... args) {
   return product_set<std::tuple<Args...>, Args...>(toList(args)...);
 }
 
 // Create a product set from the specified containers, not necessarily of the same underlying type
 //    Each container must have valid usage with std::begin() and std::end()
-template< template<typename T> class C, typename... Args>
+template<template<typename T> class C, typename... Args>
 product_set<std::tuple<Args...>, Args...> from(C<Args>... args) {
   return product_set<std::tuple<Args...>, Args...>(toList(args)...);
 }

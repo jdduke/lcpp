@@ -5,11 +5,14 @@ set(CMAKE_DEBUG_POSTFIX "d")
 
 # Treat warnings as errors cmake option
 set(TREAT_WARNINGS_AS_ERRORS TRUE  CACHE BOOL "Treat warnings as errors")
-SET(BUILD_SAMPLES            TRUE  CACHE BOOL "Build samples")
+set(BUILD_SAMPLES            TRUE  CACHE BOOL "Build samples")
 set(BUILD_TESTS              FALSE CACHE BOOL "Build tests")
 
 if(MSVC)
-  MESSAGE(FATAL_ERROR "ERROR: MSVC does not support variadic templates.  Try the latest release of the most excellent MinGW.")
+  set(USE_INTEL              FALSE CACHE BOOL "Use Intel C++ compiler")
+  if (NOT USE_INTEL)
+    MESSAGE(FATAL_ERROR "ERROR: MSVC does not support variadic templates.  Try the latest release of the most excellent MinGW.")
+  endif()
 endif()
 
 if(CMAKE_SIZEOF_VOID_P MATCHES 4)
@@ -63,6 +66,18 @@ if(UNIX OR MINGW)
 endif()
 
 include_directories(include)
+
+if(USE_INTEL)
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /Qstd=c++0x")
+  MACRO(lcpp_add_executable target ARGS)
+    add_executable(${target} ${ARGS})
+    set_target_properties(${target} PROPERTIES PLATFORM_TOOLSET "Intel C++ Compiler XE 12.1")
+  ENDMACRO()
+else()
+  MACRO(lcpp_add_executable target ARGS)
+    add_executable(${target} ${ARGS})
+  ENDMACRO()
+endif()
 
 if(BUILD_SAMPLES)
   add_subdirectory(samples)

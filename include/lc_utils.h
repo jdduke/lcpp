@@ -13,6 +13,13 @@
 #include <tuple>
 #include <vector>
 
+#if defined(__INTEL_COMPILER)
+namespace std {
+template <typename T>
+typename std::add_rvalue_reference<T>::type declval();
+}
+#endif
+
 namespace lc {
 
 ///////////////////////////////////////////////////////////////////////////
