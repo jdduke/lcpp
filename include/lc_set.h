@@ -10,8 +10,7 @@
 #include "lc_common.h"
 #include "lc_utils.h"
 
-#include <iterator>
-#include <initializer_list>
+#include <iterator>#include <initializer_list>
 
 namespace lc {
 
@@ -55,24 +54,10 @@ struct product_set {
       mFilters(std::move(l)),
       mTransform(std::make_tuple<Args...>) { }
 
-  // Copy constructor
-  //  TODO: Disable this
-  product_set(const product_set& other)
-    : mLists(other.mLists),
-      mFilters(other.mFilters),
-      mTransform(other.mTransform) { }
-
   // Copy move constructor
   product_set(product_set&& other) {
     swap(std::move(other));
   }
-
-  // Copy constructor from set with different transform type
-  //  TODO: Disable this
-  template<typename R2>
-  product_set(const product_set<R2,Args...>& other)
-    : mLists(other.mLists),
-      mFilters(other.mFilters) { }
 
   // Copy move constructor from set with different transform type
   template<typename R2>
@@ -90,7 +75,6 @@ struct product_set {
 
   ///////////////////////////////////////////////////////////////////////////
   // Methods
-
 
   // Adds a filter to the set, no processing is performed
   //    The filter must have a signature of type:   bool(Args...)
@@ -121,19 +105,24 @@ struct product_set {
   //    2) Each set element is the result of transforming the candidate tuple by the member transform
   result_list operator()() const {
     result_list results;
+
+#if 1
+    for (const auto& r : *this)
+      results.push_back(r);
+#else
     auto back = back_inserter(results);
-
-    for (auto b = tupleBegin(), it = tupleBegin(), e = tupleEnd(); iterate(it, b, e); )
-      if( filter(it) )
+    for (auto b = tupleBegin(), it = tupleBegin(), e = tupleEnd(); it != e; iterate(it, b, e) )
+       if (filter(it))
         back = transform(it);
+#endif
 
-    return results;
+    return std::move(results);
   }
 
   // Return an iterator to the first element of the output set
   //   Note: Set generation is lazy.  Filtering and transforming is only performed
   //         as the iterator is incremented and dereferenced.
-  iterator<const_tuple_iter> begin() const { return iterator<const_tuple_iter>(tupleBegin(), *this); }
+  iterator<const_tuple_iter> begin() const { return iterator<const_tuple_iter>(tupleBegin(), *this, true); }
 
   // Return an iterator to the end of the output set
   //   Note: This does not refer to a valid value, and should not be dereferenced
@@ -142,6 +131,7 @@ struct product_set {
 private:
 
   product_set();
+  product_set(const product_set&);
   product_set& operator=(const product_set&);
 
   void swap(product_set&& other) {
@@ -150,19 +140,9 @@ private:
     std::swap(mTransform, other.mTransform);
   }
 
-  // Create a tuple of values from a tuple of iterators
-  static tuple_value valueOf(tuple_iter it) {
-    return tuple_apply(tuple_indices(), it,     deref());
-  }
-
   // Create a tuple of values from a tuple of const iterators
   static tuple_value valueOf(const_tuple_iter it) {
     return tuple_apply(tuple_indices(), it,     deref());
-  }
-
-  // Create a tuple of iterators to the beginnings of each list in a tuple of lists
-  tuple_iter tupleBegin() {
-    return tuple_apply(tuple_indices(), mLists, container_begin());
   }
 
   // Create a tuple of const iterators to the beginnings of each list in a tuple of lists
@@ -170,24 +150,9 @@ private:
     return tuple_apply(tuple_indices(), mLists, container_begin());
   }
 
-  // Create a tuple of iterators to the ends of each list in a tuple of lists
-  tuple_iter tupleEnd() {
-    return tuple_apply(tuple_indices(), mLists, container_end());
-  }
-
   // Create a tuple of const iterators to the ends of each list in a tuple of lists
   const_tuple_iter tupleEnd() const {
     return tuple_apply(tuple_indices(), mLists, container_end());
-  }
-
-  // Return whether the value referenced by the iterator satisifes all filter conditions
-  bool filter(tuple_iter& it) const {
-    const auto v = valueOf(it);
-    for (auto f = std::begin(mFilters); f != std::end(mFilters); ++f) {
-      if (!apply(tuple_indices(), v, *f))
-        return false;
-    }
-    return true;
   }
 
   // Return whether the value referenced by the const iterator satisifes all filter conditions
@@ -200,11 +165,6 @@ private:
     return true;
   }
 
-  // Transform the value referenced by the iterator according to the member transform
-  R transform(tuple_iter it) const {
-    return apply(tuple_indices(), valueOf(it), mTransform);
-  }
-
   // Transform the value referenced by the const iterator according to the member transform
   R transform(const_tuple_iter it) const {
     return apply(tuple_indices(), valueOf(it), mTransform);
@@ -215,7 +175,6 @@ private:
   tuple_list     mLists;     // A tuple containing the user-provided lists of data
   filter_list    mFilters;   // A list of filters for the candidate tuples
   transform_type mTransform; // A transform that maps filtered tuples to the output set
-
 };
 
 // An iterator to the set that yields filtered and transformed set elements
@@ -226,52 +185,79 @@ template< typename It >
 class product_set<R,Args...>::iterator : public std::iterator<std::forward_iterator_tag, R, ptrdiff_t, const R*, const R&> {
 public:
 
-  iterator(It it, product_set& c)
-    : mIt(it), mBegin(c.tupleBegin()), mEnd(c.tupleEnd()), mDirty(true), mSource(c) { advanceBegin(); }
+  iterator() : mDirty(false), mSource(nullptr) { }
 
-  iterator(It it, const product_set& c)
-    : mIt(it), mBegin(c.tupleBegin()), mEnd(c.tupleEnd()), mDirty(true), mSource(c) { advanceBegin(); }
+  iterator(It it, const product_set& c, bool advanceToBegin = false)
+    : mIt(it),
+      mBegin(c.tupleBegin()),
+      mEnd(c.tupleEnd()),
+      mDirty(true),
+      mSource(&c) { if (advanceToBegin) advanceBegin(); }
 
   iterator(const iterator& other)
-    : mIt(other.mIt), mBegin(other.mBegin), mEnd(other.mEnd), mDirty(other.mDirty), mSource(other.mSource) { }
+    : mIt(other.mIt),
+      mBegin(other.mBegin),
+      mEnd(other.mEnd),
+      mValue(other.mValue),
+      mDirty(other.mDirty),
+      mSource(other.mSource) { }
 
-  const R& operator*()  const { update();   return  mValue; }
-  const R* operator->() const { update();   return &mValue; }
-  iterator& operator++()      { advance(1); return *this;   }
+  iterator& operator=(iterator other) {
+    swap(std::move(other));
+  }
 
-  bool operator==(const iterator& other) { return mIt == other.mIt; }
-  bool operator!=(const iterator& other) { return mIt != other.mIt; }
-  operator bool() const { return mIt != mEnd; }
+  const R&  operator*()  const { update();  return  mValue; }
+  const R*  operator->() const { update();  return &mValue; }
+  iterator& operator++()       { advance(); return *this;   }
+
+  bool operator==(const iterator& other) const { return mIt == other.mIt; }
+  bool operator!=(const iterator& other) const { return mIt != other.mIt; }
+       operator bool()                   const { return mIt != mEnd; }
 
 private:
 
+  bool valid() const { return nullptr != mSource; }
+
+  void swap(iterator&& other) {
+    using std::swap;
+    swap(mIt,     other.mIt);
+    swap(mBegin,  other.mBegin);
+    swap(mEnd,    other.mEnd);
+    swap(mValue,  other.mValue);
+    swap(mSource, other.mSource);
+    swap(mDirty,  other.mDirty);
+  }
+
   void update() const {
-    if (!mDirty)
+    if (!valid() || !mDirty)
       return;
 
-    mValue = mSource.transform(mIt);
+    mValue = mSource->transform(mIt);
     mDirty = false;
   }
 
   void advance(size_t count) {
-    mDirty = count > 0;
+    if (!valid())
+      return;
+
     while (count > 0 && iterate(mIt, mBegin, mEnd)) {
-      if(mSource.filter(mIt))
+      mDirty = true;
+      if(mSource->filter(mIt))
         --count;
     }
   }
 
   void advanceBegin() {
-    if(!mSource.filter(mIt))
+    if(mIt != mEnd && !mSource->filter(mIt))
       advance(1);
   }
 
   It  mIt;
   It  mBegin;
   It  mEnd;
-  mutable R   mValue;
-  mutable bool     mDirty;
-  const product_set& mSource;
+  mutable R          mValue;
+  mutable bool       mDirty;
+  const product_set* mSource;
 };
 
 ///////////////////////////////////////////////////////////////////////////

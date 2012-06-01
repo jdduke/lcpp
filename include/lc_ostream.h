@@ -50,6 +50,19 @@ std::ostream& operator<<(std::basic_ostream<Ch,Traits>& os,
   return os << ")";
 }
 
+struct printer {
+  typedef void value_type;
+
+  template <typename T>
+  printer& operator=(const T& t) {
+    std::cout << t; return *this;
+  }
+
+  printer& operator++() {
+    return *this;
+  }
+};
+
 ///////////////////////////////////////////////////////////////////////////
 
 } // namespace lc
