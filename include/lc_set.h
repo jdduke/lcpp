@@ -10,7 +10,8 @@
 #include "lc_common.h"
 #include "lc_utils.h"
 
-#include <iterator>#include <initializer_list>
+#include <iterator>
+#include <initializer_list>
 
 namespace lc {
 
@@ -236,7 +237,7 @@ private:
     mDirty = false;
   }
 
-  void advance(size_t count) {
+  void advance(size_t count = 1) {
     if (!valid())
       return;
 
